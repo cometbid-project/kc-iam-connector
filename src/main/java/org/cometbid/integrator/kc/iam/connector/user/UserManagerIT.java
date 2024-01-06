@@ -15,7 +15,8 @@ import org.cometbid.integrator.kc.iam.connector.exception.ConflictException;
  */
 public sealed interface UserManagerIT permits UserManager {
 
-    CreateUserResponse createUser(KeycloakUser keycloakUser) throws ConflictException, ClientErrorException, IOException;
+    CreateUserResponse createUser(CreateUserRequest createUserRequest)
+            throws NotFoundException, ConflictException, ClientErrorException, IOException;
 
     void assignUserToGroup(String username, final String groupId) throws ClientErrorException, NotFoundException, IOException;
 
@@ -39,11 +40,10 @@ public sealed interface UserManagerIT permits UserManager {
             throws ClientErrorException, NotFoundException, IOException;
 
     void expirePasswordByUsername(final String username) throws ClientErrorException, NotFoundException, IOException;
-    
+
     void expirePasswordById(final String userId) throws ClientErrorException, NotFoundException, IOException;
 
-    void changePassword(final String username, String newPlainTextPassword)
-            throws ClientErrorException, NotFoundException, IOException;
+    void changePassword(final String username, String newPlainTextPassword) throws ClientErrorException, NotFoundException, IOException;
 
     void emailVerificationByUsername(final String username) throws ClientErrorException, NotFoundException, IOException;
 

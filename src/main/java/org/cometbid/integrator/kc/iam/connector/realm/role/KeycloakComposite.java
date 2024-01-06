@@ -17,5 +17,4 @@ public record KeycloakComposite(Set<String> realms, Map<String, List<String>> cl
     static KeycloakComposite create(Set<String> realms, Map<String, List<String>> clients) {
         return new KeycloakComposite(realms, clients);
     }
-    
 }

@@ -10,7 +10,6 @@ import jakarta.ws.rs.NotFoundException;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URI;
-import java.net.URL;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.RSAPublicKeySpec;

@@ -13,5 +13,4 @@ public record Group(String id, String name, String description) {
     static Group createGroup(String id, String groupName, String groupDesc) {
         return new Group(id, groupName, groupDesc);
     }
-
 }

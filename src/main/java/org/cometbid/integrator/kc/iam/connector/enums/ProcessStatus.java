@@ -13,7 +13,7 @@ public enum ProcessStatus {
     SUCCESS("successful"),
     FAILED("failed"),
     IN_PROGRESS("in-progress"),
-    COMPLETED("profile_status");
+    COMPLETED("completed");
 
     private String status;
 

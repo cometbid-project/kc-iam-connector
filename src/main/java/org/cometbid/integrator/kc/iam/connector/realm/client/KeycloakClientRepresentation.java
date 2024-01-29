@@ -6,6 +6,8 @@ package org.cometbid.integrator.kc.iam.connector.realm.client;
 
 import java.util.List;
 import java.util.Map;
+import org.keycloak.representations.idm.ProtocolMapperRepresentation;
+import org.keycloak.representations.idm.authorization.ResourceServerRepresentation;
 
 /**
  *
@@ -24,16 +26,13 @@ public record KeycloakClientRepresentation(String id,
         String clientAuthenticatorType,
         String secret,
         String registrationAccessToken,
-        List<String> redirectUris,
-        List<String> webOrigins,
         Integer notBefore,
         Boolean bearerOnly,
         Boolean consentRequired,
         Boolean standardFlowEnabled,
         Boolean implicitFlowEnabled,
         Boolean directAccessGrantsEnabled,
-        Boolean serviceAccountsEnabled,
-        Boolean oauth2DeviceAuthorizationGrantEnabled,
+        Boolean serviceAccountsEnabled,        
         Boolean authorizationServicesEnabled,
         Boolean publicClient,
         Boolean frontchannelLogout,
@@ -43,9 +42,13 @@ public record KeycloakClientRepresentation(String id,
         Boolean fullScopeAllowed,
         Integer nodeReRegistrationTimeout,
         Map<String, Integer> registeredNodes,
+        List<String> redirectUris,
+        List<String> webOrigins,
         List<String> defaultClientScopes,
         List<String> optionalClientScopes,
         Map<String, Boolean> access,
+        List<ProtocolMapperRepresentation> protocolMappers,
+        ResourceServerRepresentation authorizationSettings,
         String origin) {
 
 }

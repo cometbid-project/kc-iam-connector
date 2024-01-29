@@ -23,6 +23,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.apache.commons.lang3.StringUtils;
 import org.cometbid.integrator.kc.iam.connector.config.PasswordConfigProperties;
+import org.cometbid.integrator.kc.iam.connector.enums.ProfileStatus;
 import static org.cometbid.integrator.kc.iam.connector.enums.ProfileStatus.PASSWORD_EXPIRED;
 import static org.cometbid.integrator.kc.iam.connector.enums.ProfileStatus.PROFILE_EXPIRED;
 import static org.cometbid.integrator.kc.iam.connector.enums.ProfileStatus.PROFILE_LOCKED;
@@ -49,7 +50,6 @@ import org.keycloak.admin.client.resource.UserResource;
 @Log4j2
 public final class UserManager implements UserManagerIT {
 
-    //private final KeycloakRealmResource keycloakRealmResource;
     private final KeycloakUserResource keycloakUserResource;
     private final KeycloakRoleResource keycloakRoleResource;
     private final KeycloakPasswordResource keycloakPasswordResource;
@@ -74,22 +74,29 @@ public final class UserManager implements UserManagerIT {
 
     /**
      *
-     * @param keycloakUser
+     * @param createUserRequest
      * @return
      * @throws ConflictException
      * @throws ClientErrorException
      * @throws IOException
      */
     @Override
-    public CreateUserResponse createUser(KeycloakUser keycloakUser)
+    public CreateUserResponse createUser(CreateUserRequest createUserRequest)
             throws NotFoundException, ConflictException, ClientErrorException, IOException {
 
+        KeycloakUser keycloakUser = createUserRequest.keycloakUser();
+        List<String> recoveryCodelist = createUserRequest.recoveryCodelist();
+        List<Role> roles = createUserRequest.roles();
+        ProfileStatus profileStatus = createUserRequest.profileStatus();
+        String plainPassword = createUserRequest.plainPassword();
+        
         try {
             String username = keycloakUser.username();
 
-            CredentialRepresentation credentialRep = createPasswordRepresentation(keycloakUser.password());
+            CredentialRepresentation credentialRep = createPasswordRepresentation(plainPassword);
             List<SocialLinkRepresentation> socialLinkRepresentation = createSocialLinkRepresentations(keycloakUser.socialLinks());
-            UserRepresentation userRepresentation = createUserRepresentation(keycloakUser, credentialRep, socialLinkRepresentation);
+            UserRepresentation userRepresentation = createUserRepresentation(keycloakUser, recoveryCodelist, roles,
+                    profileStatus, credentialRep, socialLinkRepresentation);
 
             Response response = this.keycloakUserResource.getUsersResource().create(userRepresentation);
 
@@ -592,8 +599,9 @@ public final class UserManager implements UserManagerIT {
         return socialLinks.stream().map(this::createSocialLinkRepresentation).collect(Collectors.toList());
     }
 
-    private UserRepresentation createUserRepresentation(KeycloakUser keycloakUser,
-            CredentialRepresentation credRepresentation, List<SocialLinkRepresentation> socialLinkRepresentations) 
+    private UserRepresentation createUserRepresentation(KeycloakUser keycloakUser, List<String> recoveryCodelist,
+            List<Role> roles, ProfileStatus profileStatus,
+            CredentialRepresentation credRepresentation, List<SocialLinkRepresentation> socialLinkRepresentations)
             throws ClientErrorException, NotFoundException, IOException {
 
         // Define the user
@@ -608,16 +616,16 @@ public final class UserManager implements UserManagerIT {
         newUser.setEmailVerified(keycloakUser.emailVerified());
         newUser.setCredentials(Arrays.asList(credRepresentation));
 
-        List<String> roleNames = this.getRealmRoleName(keycloakUser.roles());
+        List<String> roleNames = this.getRealmRoleName(roles);
         newUser.setRealmRoles(roleNames);
 
         newUser.setGroups(List.of());
         newUser.setClientRoles(Map.of());
         newUser.setSocialLinks(socialLinkRepresentations);
 
-        String[] recoveryCodes = keycloakUser.recoveryCodes();
-        if (keycloakUser.recoveryCodes() != null) {
-            List<String> recoveryCodelist = Arrays.asList(recoveryCodes);
+        //String[] recoveryCodes = keycloakUser.recoveryCodes();
+        if (CollectionUtils.isNotEmpty(recoveryCodelist)) {
+            //List<String> recoveryCodelist = Arrays.asList(recoveryCodes);
             Map<String, List<String>> attributesMap = newUser.getAttributes();
             attributesMap.put(RECOVERY_CODES, recoveryCodelist);
         }
@@ -628,10 +636,10 @@ public final class UserManager implements UserManagerIT {
             disableMFA(newUser);
         }
 
-        if (keycloakUser.status() == PROFILE_ACTIVE) {
+        if (profileStatus == PROFILE_ACTIVE) {
             newUser.singleAttribute(PROFILE_ACTIVE.getProfileStatus(), Boolean.TRUE.toString());
         } else {
-            switch (keycloakUser.status()) {
+            switch (profileStatus) {
                 case PROFILE_LOCKED:
                     // Only Admin can unlock
                     newUser.singleAttribute(PROFILE_LOCKED.getProfileStatus(), Boolean.TRUE.toString());

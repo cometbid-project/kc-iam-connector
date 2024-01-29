@@ -39,6 +39,7 @@ public class RealmFinder implements RealmFinderIT {
      * @throws NotFoundException
      * @throws IOException
      */
+    @Override
     public List<KeycloakGroup> findDefaultGroups() throws ClientErrorException, NotFoundException, IOException {
         List<GroupRepresentation> list = this.keycloakRealmResource.realmResource().getDefaultGroups();
 
@@ -51,6 +52,7 @@ public class RealmFinder implements RealmFinderIT {
      * @throws NotFoundException
      * @throws IOException
      */
+    @Override
     public List<KeycloakClientScopeRepresentation> findDefaultClientScopes() throws ClientErrorException, NotFoundException, IOException {
         List<ClientScopeRepresentation> list = this.keycloakRealmResource.realmResource().getDefaultDefaultClientScopes();
 
@@ -63,6 +65,7 @@ public class RealmFinder implements RealmFinderIT {
      * @throws NotFoundException
      * @throws IOException
      */
+    @Override
     public List<KeycloakClientScopeRepresentation> findDefaultOptionalClientScopes() throws ClientErrorException, NotFoundException, IOException {
         List<ClientScopeRepresentation> list = this.keycloakRealmResource.realmResource().getDefaultOptionalClientScopes();
 

@@ -6,6 +6,7 @@ package org.cometbid.integrator.kc.iam.connector.realm.role;
 
 import java.util.List;
 import java.util.Map;
+import org.keycloak.representations.idm.RoleRepresentation;
 
 /**
  *
@@ -17,6 +18,6 @@ public record KeycloakRole(String id,
         boolean composite,
         Boolean clientRole,
         String containerId,
-        Map<String, List<String>> attributes) {
-
+        Map<String, List<String>> attributes,
+        RoleRepresentation.Composites composites) {
 }

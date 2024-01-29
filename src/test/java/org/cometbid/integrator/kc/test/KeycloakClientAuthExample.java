@@ -5,9 +5,9 @@
 package org.cometbid.integrator.kc.test;
 
 import com.cometbid.integrator.kc.test.util.AbstractCredentialsFactory;
-import org.cometbid.integrator.kc.iam.connector.realm.KeycloakClientFactory;
+import org.cometbid.integration.kc.iam.connector.realm.KeycloakClientFactory;
 import java.util.Optional;
-import org.cometbid.integrator.kc.iam.connector.config.KeycloakConfigProperties;
+import org.cometbid.integration.kc.iam.connector.config.KeycloakConfigProperties;
 import static org.cometbid.integrator.kc.test.KeycloakProperties.*;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.AccessToken;

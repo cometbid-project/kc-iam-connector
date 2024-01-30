@@ -1,0 +1,36 @@
+name: Manual Maven Deploy Package GH
+
+on:
+  workflow_dispatch:
+    inputs:
+      VERSION:
+        description: "The SemVer version number"
+        required: true
+
+jobs:
+  deploygh:
+    runs-on: ubuntu-latest
+
+    env:
+      artifact_name: kc-iam-connector
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        
+      - name: Set up JDK 17 for deploy to github packages
+        uses: actions/setup-java@v4
+        with:
+          distribution: "adopt"
+          java-version: "17"
+          server-id: github
+
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+
+      - name: Update package version
+        run: mvn versions:set -DnewVersion=${{ github.event.inputs.VERSION }}
+
+      - name: Publish to GitHub Packages Apache Maven
+        run: mvn deploy -PgithubDeploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

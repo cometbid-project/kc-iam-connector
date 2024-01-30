@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.cometbid.integration</groupId>
     <artifactId>kc-iam-connector</artifactId>
-    <version>0.0.1</version>
+    <version>0.1.0</version>
     <packaging>jar</packaging>
     
     <name>${project.groupId}:${project.artifactId}</name>
@@ -14,36 +14,238 @@
         <license>
             <name>MIT License</name>
             <url>http://www.opensource.org/licenses/mit-license.php</url>
+            <distribution>repo</distribution>
         </license>
     </licenses>
+    
     <developers>
         <developer>
             <name>Adebowale Samuel</name>
             <email>samuel.adebowale@cometbid.org</email>
+            <url>https://www.cometbid.org/</url>
             <organization>The Cometbid Software Foundation Inc.</organization>
             <organizationUrl>https://github.com/cometbid-sfi</organizationUrl>
         </developer>
     </developers>
     
+    <organization>
+        <name>Cometbid.Org</name>
+        <url>https://www.cometbid.org/</url>
+    </organization>	
+    
     <scm>
-        <connection>scm:git:git://github.com/simpligility/ossrh-demo.git</connection>
+        <connection>scm:git:git://github.com/cometbid-sfi/kc-iam-connector.git</connection>
         <developerConnection>scm:git:ssh://github.com/cometbid-sfi/kc-iam-connector.git</developerConnection>
         <url>https://github.com/cometbid-sfi/kc-iam-connector/tree/main</url>
     </scm>
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
+    
+    <issueManagement>
+        <system>github</system>
+        <url>https://github.com/cometbid-sfi/kc-iam-connector/issues</url>
+    </issueManagement>
+    
+    <profiles>
+        <profile>
+            <id>ossrhDeploy</id>
+            <distributionManagement>
+                <repository>
+                    <id>ossrh</id>
+                    <name>Central Repository OSSRH</name>
+                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                </repository>
+                <snapshotRepository>
+                    <id>ossrh</id>
+                    <name>Central Repository OSSRH</name>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                </snapshotRepository>
+            </distributionManagement>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>1.6.13</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <gpgArguments>
+                                        <arg>--pinentry-mode</arg>
+                                        <arg>loopback</arg>
+                                    </gpgArguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>githubDeploy</id>
+            <distributionManagement>
+                <repository>
+                    <id>github</id>
+                    <name>GitHub Cometbid-SFI Apache Maven Packages</name>
+                    <url>https://maven.pkg.github.com/cometbid-sfi/kc-iam-connector</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+        <profile>
+            <id>coverage</id>
+            <build>
+                <plugins>
+                    <!-- Plugins for JACOCO Coverage report -->
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco.version}</version>               
+                        <configuration>
+                            <excludes>
+                                <exclude>org.cometbid.integration.kc.iam.connector/**/ExcludedPOJO.class</exclude>
+                                <exclude>org.cometbid.integration.kc.iam.connector/**/*DTO.*</exclude>
+                                <exclude>**/config/*</exclude>
+                                <exclude>**/exception/*</exclude>
+                            </excludes>
+                            <skip>false</skip>
+                            <check/>                   
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/jacoco</outputDirectory>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>check-coverage</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                                <configuration>
+                                    <check>
+                                        <instructionRatio>100</instructionRatio>
+                                        <branchRatio>95</branchRatio>
+                                        <lineRatio>90</lineRatio>
+                                        <methodRatio>90</methodRatio>
+                                        <classRatio>90</classRatio>
+                                    </check>
+                                    <rules>
+                                        <rule>
+                                            <element>CLASS</element>
+                                            <excludes>
+                                                <exclude>*Test</exclude>
+                                            </excludes>
+                                            <limits>
+                                                <limit>
+                                                    <counter>LINE</counter>
+                                                    <value>COVEREDRATIO</value>
+                                                    <minimum>0.00</minimum>
+                                                </limit>
+                                            </limits>
+                                        </rule>
+                                        <rule>
+                                            <element>BUNDLE</element>
+                                            <limits>
+                                                <limit>
+                                                    <counter>INSTRUCTION</counter>
+                                                    <value>COVEREDRATIO</value>
+                                                    <minimum>0.00</minimum>
+                                                </limit>
+                                                <limit>
+                                                    <counter>BRANCH</counter>
+                                                    <value>COVEREDRATIO</value>
+                                                    <minimum>0.00</minimum>
+                                                </limit>
+                                            </limits>
+                                        </rule>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>analysis</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.hjug.refactorfirst.plugin</groupId>
+                        <artifactId>refactor-first-maven-plugin</artifactId>
+                        <version>0.4.0</version>       
+                        <configuration>
+                            <showDetails>true</showDetails>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>refactor-first</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.github.spotbugs</groupId>
+                        <artifactId>spotbugs-maven-plugin</artifactId>
+                        <version>4.8.3.0</version>
+                        <configuration>
+                            <htmlOutput>true</htmlOutput>
+                            <excludeFilterFile>${session.executionRootDirectory}/spotbugs-exclude.xml</excludeFilterFile>
+                            <plugins>
+                                <plugin>
+                                    <groupId>com.h3xstream.findsecbugs</groupId>
+                                    <artifactId>findsecbugs-plugin</artifactId>
+                                    <version>1.12.0</version>
+                                </plugin>
+                            </plugins>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>spotbugs</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.release>17</maven.compiler.release>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         
@@ -61,7 +263,7 @@
         <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
         <sonar.language>java</sonar.language>
         
-        <exec.mainClass>org.cometbid.integrator.kc.iam.connector.KcIamConnector</exec.mainClass>
+        <exec.mainClass>org.cometbid.integration.kc.iam.connector.KcIamConnector</exec.mainClass>
     </properties>
     
     <dependencies>
@@ -136,10 +338,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.12.0</version>
+                <version>3.12.1</version>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+                    <release>${java.version}</release>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
@@ -169,7 +372,7 @@
                     <execution>
                         <id>attach-sources</id>
                         <goals>
-                            <goal>jar-no-fork</goal>
+                            <goal>jar</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -203,6 +406,31 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                    <shadedClassifierName>jar-with-dependencies</shadedClassifierName>
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>module-info.class</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.simplify4u.plugins</groupId>
                 <artifactId>sign-maven-plugin</artifactId>
                 <version>1.0.1</version>
@@ -211,86 +439,6 @@
                         <goals>
                             <goal>sign</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- Plugins for JACOCO Coverage report -->
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco.version}</version>               
-                <configuration>
-                    <excludes>
-                        <exclude>org.cometbid.integration.kc.iam.connector/**/ExcludedPOJO.class</exclude>
-                        <exclude>org.cometbid.integration.kc.iam.connector/**/*DTO.*</exclude>
-                        <exclude>**/config/*</exclude>
-                        <exclude>**/exception/*</exclude>
-                    </excludes>
-                    <skip>false</skip>
-                    <check/>                   
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>prepare-agent</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/jacoco</outputDirectory>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>check-coverage</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                        <configuration>
-                            <check>
-                                <instructionRatio>100</instructionRatio>
-                                <branchRatio>95</branchRatio>
-                                <lineRatio>90</lineRatio>
-                                <methodRatio>90</methodRatio>
-                                <classRatio>90</classRatio>
-                            </check>
-                            <rules>
-                                <rule>
-                                    <element>CLASS</element>
-                                    <excludes>
-                                        <exclude>*Test</exclude>
-                                    </excludes>
-                                    <limits>
-                                        <limit>
-                                            <counter>LINE</counter>
-                                            <value>COVEREDRATIO</value>
-                                            <minimum>0.00</minimum>
-                                        </limit>
-                                    </limits>
-                                </rule>
-                                <rule>
-                                    <element>BUNDLE</element>
-                                    <limits>
-                                        <limit>
-                                            <counter>INSTRUCTION</counter>
-                                            <value>COVEREDRATIO</value>
-                                            <minimum>0.00</minimum>
-                                        </limit>
-                                        <limit>
-                                            <counter>BRANCH</counter>
-                                            <value>COVEREDRATIO</value>
-                                            <minimum>0.00</minimum>
-                                        </limit>
-                                    </limits>
-                                </rule>
-                            </rules>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

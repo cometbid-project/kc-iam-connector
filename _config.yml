@@ -1,0 +1,8 @@
+remote_theme: pages-themes/minimal@v0.2.0
+plugins:
+- jekyll-remote-theme # add this line to the plugins list if you already have one
+
+title: [Keycloak Admin client adapter]
+description: [Keycloak iam connector wraps keycloak's admin client api providing easy to use implementation of an open-sourced Identity and Access Management platform]
+
+show_downloads: ["true"]

@@ -1,0 +1,14 @@
+org.cometbid.integration.kc.iam.connector
+org.cometbid.integration.kc.iam.connector.common.model
+org.cometbid.integration.kc.iam.connector.config
+org.cometbid.integration.kc.iam.connector.enums
+org.cometbid.integration.kc.iam.connector.error
+org.cometbid.integration.kc.iam.connector.exception
+org.cometbid.integration.kc.iam.connector.group
+org.cometbid.integration.kc.iam.connector.realm
+org.cometbid.integration.kc.iam.connector.realm.client
+org.cometbid.integration.kc.iam.connector.realm.role
+org.cometbid.integration.kc.iam.connector.resource
+org.cometbid.integration.kc.iam.connector.totp
+org.cometbid.integration.kc.iam.connector.user
+org.cometbid.integration.kc.iam.connector.util

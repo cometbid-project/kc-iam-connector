@@ -3,6 +3,9 @@ plugins:
 - jekyll-remote-theme # add this line to the plugins list if you already have one
 
 title: [Keycloak Admin client adapter]
+author: 
+  name: Adebowale Samuel
+  email: samuel.adebowale@cometbid.org
 description: [Keycloak iam connector wraps keycloak's admin client api providing easy to use implementation of an open-sourced Identity and Access Management platform]
 
 show_downloads: ["true"]

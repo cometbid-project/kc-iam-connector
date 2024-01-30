@@ -24,7 +24,7 @@
             <email>samuel.adebowale@cometbid.org</email>
             <url>https://www.cometbid.org/</url>
             <organization>The Cometbid Software Foundation Inc.</organization>
-            <organizationUrl>https://github.com/cometbid-sfi</organizationUrl>
+            <organizationUrl>https://github.com/cometbid-project</organizationUrl>
         </developer>
     </developers>
     
@@ -34,14 +34,14 @@
     </organization>	
     
     <scm>
-        <connection>scm:git:git://github.com/cometbid-sfi/kc-iam-connector.git</connection>
-        <developerConnection>scm:git:ssh://github.com/cometbid-sfi/kc-iam-connector.git</developerConnection>
-        <url>https://github.com/cometbid-sfi/kc-iam-connector/tree/main</url>
+        <connection>scm:git:git://github.com/cometbid-project/kc-iam-connector.git</connection>
+        <developerConnection>scm:git:ssh://github.com/cometbid-project/kc-iam-connector.git</developerConnection>
+        <url>https://github.com/cometbid-project/kc-iam-connector/tree/main</url>
     </scm>
     
     <issueManagement>
         <system>github</system>
-        <url>https://github.com/cometbid-sfi/kc-iam-connector/issues</url>
+        <url>https://github.com/cometbid-project/kc-iam-connector/issues</url>
     </issueManagement>
     
     <profiles>
@@ -101,7 +101,7 @@
                 <repository>
                     <id>github</id>
                     <name>GitHub Cometbid-SFI Apache Maven Packages</name>
-                    <url>https://maven.pkg.github.com/cometbid-sfi/kc-iam-connector</url>
+                    <url>https://maven.pkg.github.com/cometbid-project/kc-iam-connector</url>
                 </repository>
             </distributionManagement>
         </profile>

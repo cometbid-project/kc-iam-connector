@@ -43,7 +43,7 @@ jobs:
     - name: Publish to GitHub Packages Apache Maven
       run: mvn deploy -PgithubDeploy
       env:
-        GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
     - name: Upload jar files to release as release assets
       run: |

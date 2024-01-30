@@ -2,13 +2,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package org.cometbid.integrator.kc.test;
+package org.cometbid.integration.kc.test;
 
-import com.cometbid.integrator.kc.test.util.AbstractCredentialsFactory;
-import org.cometbid.integration.kc.iam.connector.realm.KeycloakClientFactory;
+import com.cometbid.integration.kc.test.util.AbstractCredentialsFactory;
 import java.util.Optional;
 import org.cometbid.integration.kc.iam.connector.config.KeycloakConfigProperties;
-import static org.cometbid.integrator.kc.test.KeycloakProperties.*;
+import org.cometbid.integration.kc.iam.connector.realm.KeycloakClientFactory;
+import static org.cometbid.integration.kc.test.KeycloakProperties.*;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.AccessToken;
 

@@ -8,14 +8,17 @@
 
 name: Java CI with Maven
 
+# Controls when the workflow will run
 on:
+  # Triggers the workflow on push or pull request events.
   push:
     branches: ["*"]
     paths: ["**.java", ".github/workflows/maven.yml", "pom.xml"]
   pull_request:
     branches: ["*"]
 
-  #workflow_dispatch:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 jobs:
   build:

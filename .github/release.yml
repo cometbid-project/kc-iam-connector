@@ -5,7 +5,7 @@ changelog:
     labels:
       - ignore-for-release
     authors:
-      - octocat
+      - Adebowale Oluwagbemiga
   categories:
     - title: Breaking Changes 🛠
       labels:
@@ -20,7 +20,7 @@ changelog:
         - "*"
     - title: 🏕 Features
       labels:
-        - '*'
+        - "*"
       exclude:
         labels:
           - dependencies

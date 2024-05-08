@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2024 samueladebowale.
+ * Copyright 2024 Cometbid.Org.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,23 +23,13 @@
  */
 package org.cometbid.integration.kc.iam.connector.user;
 
-import org.cometbid.integration.kc.iam.connector.enums.ProcessStatus;
+import lombok.Builder;
 
 /**
  *
  * @author samueladebowale
  */
-public record CreateUserResponse(ProcessStatus status, MfaToken token) {
-
-    static CreateUserResponse createSuccessResponse(MfaToken token) {
-        return new CreateUserResponse(ProcessStatus.SUCCESS, token);
-    }
-
-    static CreateUserResponse createFailedResponse() {
-        return new CreateUserResponse(ProcessStatus.FAILED, null);
-    }
-
-    static CreateUserResponse createCompletedResponse() {
-        return new CreateUserResponse(ProcessStatus.COMPLETED, null);
-    }
+@Builder
+public record MfaToken(String totpSecret, String qrCode) {
+    
 }

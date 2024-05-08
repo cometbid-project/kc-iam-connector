@@ -6,7 +6,7 @@
     <version>0.1.1</version>
     <packaging>jar</packaging>
     
-    <name>${project.groupId}:${project.artifactId}</name>
+    <name>${project.artifactId}</name>
     <description>Keycloak admin client adapter</description>
     <url>https://cometbid.org/kc-iam-connector</url>
     
@@ -328,18 +328,19 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <maven.compiler.release>17</maven.compiler.release>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>21</maven.compiler.release>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <junit.version>5.10.1</junit.version>
-        <jacoco.version>0.8.11</jacoco.version>
         <lombok.version>1.18.30</lombok.version>
         <log4j2.version>2.22.0</log4j2.version>
         <mapstruct.version>1.6.0.Beta1</mapstruct.version>
         <samstevens.totp.version>1.7.1</samstevens.totp.version>
-        <keycloak.admin.version>23.0.3</keycloak.admin.version>
+        <keycloak.admin.version>24.0.1</keycloak.admin.version>
+        <test-container-version>1.19.7</test-container-version>
+        <keycloak-test-container-version>3.3.0</keycloak-test-container-version>
         <jacoco.version>0.8.11</jacoco.version>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
@@ -348,6 +349,18 @@
         
         <exec.mainClass>org.cometbid.integration.kc.iam.connector.KcIamConnector</exec.mainClass>
     </properties>
+    
+    <dependencyManagement>
+        <dependencies>		
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${test-container-version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     
     <dependencies>
         <dependency>
@@ -403,6 +416,34 @@
             <version>${log4j2.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.github.dasniko</groupId>
+            <artifactId>testcontainers-keycloak</artifactId>
+            <version>${keycloak-test-container-version}</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.keycloak</groupId>
+                    <artifactId>keycloak-admin-client</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>${junit.version}</version>
@@ -412,6 +453,12 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
             <version>1.10.19</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>3.2.3</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

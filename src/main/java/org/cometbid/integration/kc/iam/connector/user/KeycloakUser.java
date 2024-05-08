@@ -26,6 +26,7 @@ package org.cometbid.integration.kc.iam.connector.user;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.Builder;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.FederatedIdentityRepresentation;
 import org.keycloak.representations.idm.UserConsentRepresentation;
@@ -35,12 +36,13 @@ import org.keycloak.representations.idm.UserProfileMetadata;
  *
  * @author samueladebowale
  */
+@Builder
 public record KeycloakUser(String id, String self, String username, String firstName,
         String lastName, String email, boolean enabled, boolean emailVerified, boolean mfaEnabled,
-        long createdTimestamp, 
+        long createdTimestamp,
         String origin,
-        String federationLink, 
-        String serviceAccountClientId, 
+        String federationLink,
+        String serviceAccountClientId,
         List<SocialLink> socialLinks,
         List<String> groups,
         Map<String, Boolean> access,
@@ -54,4 +56,43 @@ public record KeycloakUser(String id, String self, String username, String first
         Map<String, List<String>> clientRoles,
         List<UserConsentRepresentation> clientConsents,
         Integer notBefore) {
+
+    public static KeycloakUser create(String id, String username, String firstName,
+            String lastName, String email) {
+
+        return KeycloakUser.builder()
+                .id(id)
+                .username(username)
+                .firstName(firstName)
+                .lastName(lastName)
+                .email(email)
+                .build();
+    }
+
+    public static KeycloakUser create(String id, String username, String firstName,
+            String lastName, String email, boolean enabled, boolean emailVerified, boolean mfaEnabled) {
+
+        return KeycloakUser.builder()
+                .id(id)
+                .username(username)
+                .firstName(firstName)
+                .lastName(lastName)
+                .email(email)
+                .enabled(enabled)
+                .emailVerified(emailVerified)
+                .mfaEnabled(mfaEnabled)
+                .build();
+    }
+
+    public static KeycloakUser create(String username, String firstName,
+            String lastName, String email) {
+
+        return KeycloakUser.builder()
+                .username(username)
+                .firstName(firstName)
+                .lastName(lastName)
+                .email(email)
+                .build();
+    }
+
 }

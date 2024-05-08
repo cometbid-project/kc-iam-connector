@@ -52,6 +52,10 @@ public sealed interface UserManagerIT permits UserManager {
     void disableProfile(final String username) throws ClientErrorException, NotFoundException, IOException;
 
     void enableProfile(final String username) throws ClientErrorException, NotFoundException, IOException;
+    
+    void disableMfa(final String username) throws ClientErrorException, NotFoundException, IOException;
+
+    MfaToken enableMfa(final String username) throws ClientErrorException, NotFoundException, IOException;
 
     boolean isMfaEnabled(String username) throws ClientErrorException, NotFoundException, IOException;
 

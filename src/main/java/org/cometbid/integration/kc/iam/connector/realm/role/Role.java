@@ -29,4 +29,16 @@ package org.cometbid.integration.kc.iam.connector.realm.role;
  */
 public record Role(String id, String name, String description) {
 
+    public static Role create(String id, String name, String description) {
+        return new Role(id, name, description);
+    }
+
+    public static Role create(String name, String description) {
+        return new Role(null, name, description);
+    }
+
+    public static Role create(String name) {
+        return new Role(null, name, null);
+    }
+
 }

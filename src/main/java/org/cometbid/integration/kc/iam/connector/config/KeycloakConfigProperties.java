@@ -23,10 +23,13 @@
  */
 package org.cometbid.integration.kc.iam.connector.config;
 
+import lombok.Builder;
+
 /**
  *
  * @author samueladebowale
  */
+@Builder
 public record KeycloakConfigProperties(String serverUrl, String realmName,
         String clientId, String clientSecret) {
 
@@ -36,5 +39,24 @@ public record KeycloakConfigProperties(String serverUrl, String realmName,
 
     public String getRealmCertsUrl() {
         return getRealmUrl() + "/protocol/openid-connect/certs";
+    }
+
+    public static KeycloakConfigProperties create(String serverUrl, String realmName) {
+
+        return KeycloakConfigProperties.builder()
+                .serverUrl(serverUrl)
+                .realmName(realmName)
+                .build();
+    }
+
+    public static KeycloakConfigProperties create(String serverUrl, String realmName,
+            String clientId, String clientSecret) {
+
+        return KeycloakConfigProperties.builder()
+                .serverUrl(serverUrl)
+                .realmName(realmName)
+                .clientId(clientId)
+                .clientSecret(clientSecret)
+                .build();
     }
 }

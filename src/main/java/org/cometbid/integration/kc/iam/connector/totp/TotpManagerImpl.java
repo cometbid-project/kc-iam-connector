@@ -23,17 +23,24 @@
  */
 package org.cometbid.integration.kc.iam.connector.totp;
 
+import dev.samstevens.totp.code.CodeGenerator;
 import dev.samstevens.totp.code.CodeVerifier;
+import dev.samstevens.totp.code.DefaultCodeGenerator;
+import dev.samstevens.totp.code.DefaultCodeVerifier;
+import dev.samstevens.totp.code.HashingAlgorithm;
 import dev.samstevens.totp.exceptions.QrGenerationException;
 import dev.samstevens.totp.qr.QrData;
-import dev.samstevens.totp.qr.QrDataFactory;
+//import dev.samstevens.totp.qr.QrDataFactory;
 import dev.samstevens.totp.qr.QrGenerator;
+import dev.samstevens.totp.qr.ZxingPngQrGenerator;
 import dev.samstevens.totp.secret.SecretGenerator;
-import lombok.RequiredArgsConstructor;
 import static dev.samstevens.totp.util.Utils.getDataUriForImage;
 
 import java.util.SplittableRandom;
 import dev.samstevens.totp.recovery.RecoveryCodeGenerator;
+import dev.samstevens.totp.secret.DefaultSecretGenerator;
+import dev.samstevens.totp.time.SystemTimeProvider;
+import dev.samstevens.totp.time.TimeProvider;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.cometbid.integration.kc.iam.connector.util.Constants;
@@ -42,17 +49,32 @@ import org.cometbid.integration.kc.iam.connector.util.Constants;
  *
  * @author samueladebowale
  */
-@RequiredArgsConstructor
-public class TotpManagerImpl implements TotpManager {
+public final class TotpManagerImpl implements TotpManager {
+
+    private static TotpManagerImpl INSTANCE = new TotpManagerImpl();
 
     // @Value("totp.code.length")
-    private final String configOtpLength;
+    private final Integer configOtpLength;
     // @Value("totp.qrCode.issuer")
     private final String configIssuer;
     private final CodeVerifier codeVerifier;
-    private final QrDataFactory qrDataFactory;
     private final QrGenerator qrGenerator;
     private final SecretGenerator secretGenerator;
+
+    private TotpManagerImpl() {
+        this.configOtpLength = Constants.OTP_LENGTH;
+
+        // this.configIssuer = Optional.ofNullable(configIssuer)
+        //         .filter(StringUtils::isNotBlank).orElse(Constants.ISSUER);
+        this.configIssuer = Constants.ISSUER;
+        this.secretGenerator = new DefaultSecretGenerator();
+        this.qrGenerator = new ZxingPngQrGenerator();
+        this.codeVerifier = myCodeVerifier();
+    }
+
+    public static TotpManager getInstance() {
+        return INSTANCE;
+    }
 
     /**
      *
@@ -86,10 +108,17 @@ public class TotpManagerImpl implements TotpManager {
         // String secret = secretGenerator.generate();
         String qrCodeImage = null;
         try {
-            String totpIssuer = Optional.ofNullable(configIssuer)
-                    .filter(StringUtils::isNotBlank).orElse(Constants.ISSUER);
+           //String totpIssuer = Optional.ofNullable(configIssuer)
+            //        .filter(StringUtils::isNotBlank).orElse(Constants.ISSUER);
 
-            QrData data = qrDataFactory.newBuilder().label(email).secret(secret).issuer(totpIssuer).build();
+            QrData data = new QrData.Builder()
+                    .label(email)
+                    .secret(secret)
+                    .issuer(this.configIssuer)
+                    .digits(6)
+                    .period(30)
+                    .algorithm(HashingAlgorithm.SHA512)
+                    .build();
 
             byte[] imageData = qrGenerator.generate(data);
             String mimeType = qrGenerator.getImageMimeType();
@@ -112,7 +141,6 @@ public class TotpManagerImpl implements TotpManager {
 
         //Optional.ofNullable(configOtpLength).map(Ints::tryParse).orElse(Constants.OTP_LENGTH);
         int otpLength = Optional.ofNullable(configOtpLength)
-                .filter(StringUtils::isNotBlank)
                 .map(Integer::valueOf).orElse(Constants.OTP_LENGTH);
 
         SplittableRandom splittableRandom = new SplittableRandom();
@@ -136,4 +164,15 @@ public class TotpManagerImpl implements TotpManager {
         return codes;
     }
 
+    private CodeVerifier myCodeVerifier() {
+        // Time
+        TimeProvider timeProvider = new SystemTimeProvider();
+
+        // Code Generator
+        CodeGenerator codeGenerator = new DefaultCodeGenerator(HashingAlgorithm.SHA512, 6);
+        DefaultCodeVerifier localCodeVerifier = new DefaultCodeVerifier(codeGenerator, timeProvider);
+        localCodeVerifier.setTimePeriod(30);
+        localCodeVerifier.setAllowedTimePeriodDiscrepancy(2);
+        return localCodeVerifier;
+    }
 }

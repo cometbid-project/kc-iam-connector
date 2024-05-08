@@ -24,6 +24,7 @@
 package org.cometbid.integration.kc.iam.connector.resource;
 
 import java.util.Set;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
@@ -33,6 +34,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class KeycloakPasswordResource {
 
     private final PasswordEncoder passwordEncoder;
+    
+    public KeycloakPasswordResource() {
+        this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
 
     public KeycloakPasswordResource(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;

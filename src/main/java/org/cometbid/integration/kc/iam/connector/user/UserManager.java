@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.Builder;
 import org.keycloak.representations.idm.*;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
@@ -54,6 +55,7 @@ import org.cometbid.integration.kc.iam.connector.realm.role.Role;
 import org.cometbid.integration.kc.iam.connector.resource.KeycloakClientResource;
 import org.cometbid.integration.kc.iam.connector.resource.KeycloakGroupResource;
 import org.cometbid.integration.kc.iam.connector.resource.KeycloakPasswordResource;
+import org.cometbid.integration.kc.iam.connector.resource.KeycloakRealmResource;
 import org.cometbid.integration.kc.iam.connector.resource.KeycloakRoleResource;
 import org.cometbid.integration.kc.iam.connector.resource.KeycloakUserResource;
 import static org.cometbid.integration.kc.iam.connector.util.Constants.TOTP_SECRET;
@@ -61,6 +63,7 @@ import org.cometbid.integration.kc.iam.connector.totp.TotpManager;
 import static org.cometbid.integration.kc.iam.connector.util.Constants.RECOVERY_CODES;
 import static org.cometbid.integration.kc.iam.connector.util.Constants.UPDATE_PASSWORD;
 import org.keycloak.admin.client.resource.UserResource;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  *
@@ -78,17 +81,24 @@ public final class UserManager implements UserManagerIT {
     private final TotpManager totpManager;
     private final PasswordConfigProperties configProp;
 
-    public UserManager(KeycloakUserResource keycloakUserResource, KeycloakRoleResource keycloakRoleResource,
-            KeycloakPasswordResource keycloakPasswordResource, KeycloakGroupResource keycloakGroupResource,
-            KeycloakClientResource keycloakClientResource,
+    @Builder
+    public UserManager(KeycloakRealmResource keycloakRealmResource,
+            PasswordEncoder passwordEncoder,
             PasswordConfigProperties configProp, TotpManager totpManager) {
-        this.keycloakUserResource = keycloakUserResource;
-        this.keycloakRoleResource = keycloakRoleResource;
-        this.keycloakPasswordResource = keycloakPasswordResource;
-        this.keycloakGroupResource = keycloakGroupResource;
-        this.keycloakClientResource = keycloakClientResource;
+
         this.totpManager = totpManager;
         this.configProp = configProp;
+
+        this.keycloakClientResource = new KeycloakClientResource(keycloakRealmResource);
+        this.keycloakUserResource = new KeycloakUserResource(keycloakRealmResource);
+        this.keycloakGroupResource = new KeycloakGroupResource(keycloakRealmResource);
+
+        this.keycloakRoleResource = new KeycloakRoleResource(keycloakRealmResource, this.keycloakClientResource);
+        if (passwordEncoder == null) {
+            this.keycloakPasswordResource = new KeycloakPasswordResource();
+        } else {
+            this.keycloakPasswordResource = new KeycloakPasswordResource(passwordEncoder);
+        }
     }
 
     /**
@@ -105,10 +115,10 @@ public final class UserManager implements UserManagerIT {
 
         KeycloakUser keycloakUser = createUserRequest.keycloakUser();
         List<String> recoveryCodelist = createUserRequest.recoveryCodelist();
-        List<Role> roles = createUserRequest.roles();
+        Set<String> roles = createUserRequest.roles();
         ProfileStatus profileStatus = createUserRequest.profileStatus();
         String plainPassword = createUserRequest.plainPassword();
-        
+
         try {
             String username = keycloakUser.username();
 
@@ -124,11 +134,14 @@ public final class UserManager implements UserManagerIT {
             if (response.getStatus() == Response.Status.CREATED.getStatusCode()) {
                 log.debug("{} was created.", username);
 
-                List<String> totpSecrets = userRepresentation.getAttributes().getOrDefault(TOTP_SECRET, new ArrayList<>());
+                if (createUserRequest.keycloakUser().mfaEnabled()) {
+                    MfaToken mfaToken = enableMfa(username);
+                    return CreateUserResponse.createSuccessResponse(mfaToken);
+                } else {
+                    disableMfa(username);
+                    return CreateUserResponse.createSuccessResponse(null);
+                }
 
-                String totpSecret = !totpSecrets.isEmpty() ? totpSecrets.get(0) : "";
-
-                return CreateUserResponse.createSuccessResponse(totpSecret);
             } else if (response.getStatus() == Response.Status.CONFLICT.getStatusCode()) {
                 throwConflictException("""
                                       User '%s' has already been created.
@@ -545,6 +558,54 @@ public final class UserManager implements UserManagerIT {
     /**
      *
      * @param username
+     * @throws ClientErrorException
+     * @throws NotFoundException
+     * @throws IOException
+     */
+    @Override
+    public void disableMfa(final String username) throws ClientErrorException, NotFoundException, IOException {
+
+        UserResource userResource = this.keycloakUserResource.getUserResource(username);
+
+        UserRepresentation userRepresentation = userResource.toRepresentation();
+        disableMFA(userRepresentation);
+
+        userResource.update(userRepresentation);
+    }
+
+    /**
+     *
+     * @param username
+     * @return
+     * @throws ClientErrorException
+     * @throws NotFoundException
+     * @throws IOException
+     */
+    @Override
+    public MfaToken enableMfa(final String username) throws ClientErrorException, NotFoundException, IOException {
+
+        UserResource userResource = this.keycloakUserResource.getUserResource(username);
+
+        UserRepresentation userRepresentation = userResource.toRepresentation();
+        enableMFA(userRepresentation);
+
+        List<String> totpSecrets = userRepresentation.getAttributes().getOrDefault(TOTP_SECRET, new ArrayList<>());
+        String totpSecret = !totpSecrets.isEmpty() ? totpSecrets.get(0) : "";
+
+        userResource.update(userRepresentation);
+
+        //Generate the QR Code
+        String qrCode = totpManager.generateQrImage(userRepresentation.getEmail(), totpSecret);
+
+        return MfaToken.builder()
+                .totpSecret(totpSecret)
+                .qrCode(qrCode)
+                .build();
+    }
+
+    /**
+     *
+     * @param username
      * @throws java.io.IOException
      */
     @Override
@@ -619,7 +680,7 @@ public final class UserManager implements UserManagerIT {
     }
 
     private UserRepresentation createUserRepresentation(KeycloakUser keycloakUser, List<String> recoveryCodelist,
-            List<Role> roles, ProfileStatus profileStatus,
+            Set<String> roles, ProfileStatus profileStatus,
             CredentialRepresentation credRepresentation, List<SocialLinkRepresentation> socialLinkRepresentations)
             throws ClientErrorException, NotFoundException, IOException {
 
@@ -635,7 +696,7 @@ public final class UserManager implements UserManagerIT {
         newUser.setEmailVerified(keycloakUser.emailVerified());
         newUser.setCredentials(Arrays.asList(credRepresentation));
 
-        List<String> roleNames = this.getRealmRoleName(roles);
+        List<String> roleNames = this.getRoleNames(roles);
         newUser.setRealmRoles(roleNames);
 
         newUser.setGroups(List.of());
@@ -685,12 +746,24 @@ public final class UserManager implements UserManagerIT {
     }
 
     // To verify if the roles specified are existing roles
-    private List<String> getRealmRoleName(List<Role> userRoles) throws ClientErrorException, NotFoundException, IOException {
+    private List<String> getRealmRoleNames(List<Role> userRoles) throws ClientErrorException, NotFoundException, IOException {
 
         List<String> newList = new ArrayList<>();
 
         for (Role role : userRoles) {
             RoleRepresentation roleRepresentation = keycloakRoleResource.getRealmRoleRepresentation(role.name());
+            newList.add(roleRepresentation.getName());
+        }
+        return newList;
+    }
+
+    // To verify if the roles specified are existing roles
+    private List<String> getRoleNames(Set<String> userRoles) throws ClientErrorException, NotFoundException, IOException {
+
+        List<String> newList = new ArrayList<>();
+
+        for (String roleName : userRoles) {
+            RoleRepresentation roleRepresentation = keycloakRoleResource.getRealmRoleRepresentation(roleName);
             newList.add(roleRepresentation.getName());
         }
         return newList;

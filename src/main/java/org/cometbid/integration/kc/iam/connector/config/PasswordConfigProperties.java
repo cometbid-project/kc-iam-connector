@@ -41,4 +41,8 @@ public record PasswordConfigProperties(Integer numberOfPastPassword, Boolean all
                 .orElseGet(() -> Constants.ALLOW_PASSWORD_REUSE);
     }
 
+    public static PasswordConfigProperties create(Integer numberOfPastPassword, Boolean allowPasswordReuse) {
+        return new PasswordConfigProperties(numberOfPastPassword, allowPasswordReuse);
+    }
+
 }

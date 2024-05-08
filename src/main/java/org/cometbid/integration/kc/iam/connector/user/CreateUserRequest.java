@@ -24,14 +24,20 @@
 package org.cometbid.integration.kc.iam.connector.user;
 
 import java.util.List;
+import java.util.Set;
 import org.cometbid.integration.kc.iam.connector.enums.ProfileStatus;
-import org.cometbid.integration.kc.iam.connector.realm.role.Role;
 
 /**
  *
  * @author samueladebowale
  */
 public record CreateUserRequest(KeycloakUser keycloakUser, ProfileStatus profileStatus,
-        List<Role> roles, String plainPassword, List<String> recoveryCodelist) {
+        Set<String> roles, String plainPassword, List<String> recoveryCodelist) {
+
+    public static CreateUserRequest createRequest(KeycloakUser keycloakUser, ProfileStatus profileStatus,
+            Set<String> roles, String plainPassword, List<String> recoveryCodelist) {
+
+        return new CreateUserRequest(keycloakUser, profileStatus, roles, plainPassword, recoveryCodelist);
+    }
 
 }
